@@ -1,0 +1,51 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="422.83136799999994">
+<testsuite name="employee.spec.ts" timestamp="2026-01-05T10:35:20.006Z" hostname="" tests="1" failures="1" skipped="0" time="414.409" errors="0">
+<testcase name="PIM - Add Employee › Add employee with random data, verify created, then edit (using existing methods only)" classname="employee.spec.ts" time="414.409">
+<failure message="employee.spec.ts:11:9 Add employee with random data, verify created, then edit (using existing methods only)" type="FAILURE">
+<![CDATA[  employee.spec.ts:11:9 › PIM - Add Employee › Add employee with random data, verify created, then edit (using existing methods only) › Step 2 - Open PIM via left nav menu 
+
+    Error: PIM menu item should be visible
+
+    expect(locator).toBeVisible() failed
+
+    Locator:  locator('aside').getByRole('link', { name: 'PIM' }).first()
+    Expected: visible
+    Received: undefined
+    Timeout:  60000ms
+
+    Call log:
+      - PIM menu item should be visible with timeout 60000ms
+      - waiting for locator('aside').getByRole('link', { name: 'PIM' }).first()
+        - waiting for" https://opensource-demo.orangehrmlive.com/web/index.php/auth/validate" navigation to finish...
+
+
+       at ..\src\pages\LeftNavMenu.ts:22
+
+      20 |
+      21 |     public async clickPim(): Promise<void> {
+    > 22 |         await expect(this.pimMenuItem, "PIM menu item should be visible").toBeVisible();
+         |                                                                           ^
+      23 |         await this.pimMenuItem.click();
+      24 |     }
+      25 | }
+        at LeftNavMenu.clickPim (D:\Projects\orangehrm_tests\src\pages\LeftNavMenu.ts:22:75)
+        at D:\Projects\orangehrm_tests\specs\employee.spec.ts:42:27
+        at D:\Projects\orangehrm_tests\specs\employee.spec.ts:41:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\employee-PIM---Add-Employe-c1be8-sing-existing-methods-only-\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results\employee-PIM---Add-Employe-c1be8-sing-existing-methods-only-\test-failed-1.png]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[@faker-js/faker]: faker.internet.userName() is deprecated since v9.1.0 and will be removed in v10.0.0. Please use faker.internet.username() instead.
+]]>
+</system-err>
+</testcase>
+</testsuite>
+</testsuites>
