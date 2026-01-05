@@ -16,7 +16,7 @@ test.describe("PIM - Add Employee", () => {
 
         const createLoginDetails = true;
 
-        const password = createLoginDetails ? faker.internet.password({ length: 14 }) : undefined;
+        const password = createLoginDetails ? faker.internet.password({ length: 15 }) : undefined;
 
         const employeeData = {
             firstName: faker.person.firstName(),
@@ -75,7 +75,7 @@ test.describe("PIM - Add Employee", () => {
         await test.step("Step 6 - Edit Personal Details and save", async () => {
             const edited = {
                 otherId: `OID-123-${faker.person.zodiacSign()}`,
-                driversLicenseNumber: `DL-555-777-${faker.person.jobTitle()}`,
+                driversLicenseNumber: `DL-555-777-${faker.string.alpha(5)}`,
                 gender: "Male",
             } as const;
 
@@ -96,7 +96,7 @@ test.describe("PIM - Add Employee", () => {
         await test.step("Step 8 - Add attachment", async () => {
             await employeeDetailsPage.attachmentsClickAdd();
             await employeeDetailsPage.addAttachment({
-                filePath: "test-data/test-attachment.txt",
+                filePath: "fixtures/files/test-attachment.txt",
                 comment: "auto",
                 action: "save",
             });

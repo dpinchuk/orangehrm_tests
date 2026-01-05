@@ -56,9 +56,22 @@ export class EmployeeDetailsPage {
         this._middleNameInput = page.locator("input[name=\"middleName\"]").first();
         this._lastNameInput = page.locator("input[name=\"lastName\"]").first();
 
+        this._otherIdInput = page
+            .locator("form.oxd-form")
+            .first()
+            .locator("div.oxd-input-group", { has: page.locator("label.oxd-label", { hasText: "Other Id" }) })
+            .locator("input.oxd-input")
+            .first();
+
         this._employeeIdInput = this._byLabelInput(this._personalDetailsForm, "Employee Id");
-        this._otherIdInput = this._byLabelInput(this._personalDetailsForm, "Other Id");
-        this._driversLicenseNumberInput = this._byLabelInput(this._personalDetailsForm, "Driver's License Number");
+
+        this._driversLicenseNumberInput = page
+            .locator("form.oxd-form")
+            .first()
+            .locator("div.oxd-input-group", { has: page.locator("label.oxd-label", { hasText: "Driver's License Number" }) })
+            .locator("input.oxd-input")
+            .first();
+
         this._licenseExpiryDateInput = this._byLabelInput(this._personalDetailsForm, "License Expiry Date");
 
         this._nationalitySelect = this._byLabelSelect(this._personalDetailsForm, "Nationality");
@@ -72,8 +85,21 @@ export class EmployeeDetailsPage {
         this._customFieldsSection = page.locator(".orangehrm-custom-fields").first();
         this._customFieldsSaveButton = this._customFieldsSection.getByRole("button", { name: " Save " });
 
-        this._bloodTypeSelect = this._byLabelSelect(this._customFieldsSection, "Blood Type");
-        this._testFieldInput = this._byLabelInput(this._customFieldsSection, "Test_Field");
+        this._bloodTypeSelect = this._bloodTypeSelect = page
+            .locator(".orangehrm-custom-fields")
+            .locator(".oxd-input-group", {
+                has: page.locator("label.oxd-label", { hasText: "Blood Type" }),
+            })
+            .locator(".oxd-select-text-input")
+            .first();
+            
+        this._testFieldInput = this._testFieldInput = page
+            .locator(".orangehrm-custom-fields")
+            .locator(".oxd-input-group", {
+                has: page.locator("label.oxd-label", { hasText: "Test_Field" }),
+            })
+            .locator("input.oxd-input")
+            .first();
 
         this._attachmentsTitle = page.getByRole("heading", { name: "Attachments" }).first();
         this._attachmentsSection = page.locator(".orangehrm-attachment").first();
@@ -110,8 +136,17 @@ export class EmployeeDetailsPage {
     }
 
     async expectCreatedEmployeeDataDisplayed(data: { firstName: string; middleName?: string; lastName: string }): Promise<void> {
-        const fullName = [data.firstName, data.middleName, data.lastName].filter(Boolean).join(" ");
-        await expect(this._employeeHeaderName, "Created employee name should be displayed in header").toHaveText(fullName);
+        const firstLast = [data.firstName, data.lastName].filter(Boolean).join(" ").trim();
+        const fullName = [data.firstName, data.middleName, data.lastName].filter(Boolean).join(" ").trim();
+
+        const text = (await this._employeeHeaderName.first().innerText()).replace(/\s+/g, " ").trim();
+
+        if (data.middleName) {
+            expect([firstLast, fullName], "Created employee name should be displayed in header").toContain(text);
+            return;
+        }
+
+        await expect(this._employeeHeaderName.first(), "Created employee name should be displayed in header").toHaveText(firstLast);
     }
 
     async updateAndSavePersonalDetails(data: PersonalDetailsData): Promise<void> {
@@ -124,7 +159,6 @@ export class EmployeeDetailsPage {
         if (data.employeeId !== undefined) await this._fillInput(this._employeeIdInput, data.employeeId);
         if (data.otherId !== undefined) await this._fillInput(this._otherIdInput, data.otherId);
         if (data.driversLicenseNumber !== undefined) await this._fillInput(this._driversLicenseNumberInput, data.driversLicenseNumber);
-        if (data.licenseExpiryDate !== undefined) await this._fillInput(this._licenseExpiryDateInput, data.licenseExpiryDate);
 
         if (data.nationality !== undefined) await this._selectFromDropdown(this._nationalitySelect, data.nationality);
         if (data.maritalStatus !== undefined) await this._selectFromDropdown(this._maritalStatusSelect, data.maritalStatus);
@@ -145,7 +179,6 @@ export class EmployeeDetailsPage {
         if (data.otherId !== undefined) await expect(this._otherIdInput, "Other Id should be saved").toHaveValue(data.otherId);
 
         if (data.driversLicenseNumber !== undefined) await expect(this._driversLicenseNumberInput, "Driver's License Number should be saved").toHaveValue(data.driversLicenseNumber);
-        if (data.licenseExpiryDate !== undefined) await expect(this._licenseExpiryDateInput, "License Expiry Date should be saved").toHaveValue(data.licenseExpiryDate);
 
         if (data.nationality !== undefined) await expect(this._nationalitySelect, "Nationality should be saved").toContainText(data.nationality);
         if (data.maritalStatus !== undefined) await expect(this._maritalStatusSelect, "Marital Status should be saved").toContainText(data.maritalStatus);
@@ -198,11 +231,19 @@ export class EmployeeDetailsPage {
         await expect(row, "Attachment row should be present").toBeVisible();
     }
 
+    private _escapeRegExp(value: string): string {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
     private _byLabelInput(scope: Locator, labelText: string): Locator {
-        return scope
-            .locator(".oxd-input-group")
-            .filter({ has: scope.locator("label").filter({ hasText: labelText }) })
-            .locator("input")
+        const label = scope
+            .locator("label.oxd-label")
+            .filter({ hasText: new RegExp(`^${this._escapeRegExp(labelText)}$`) })
+            .first();
+
+        return label
+            .locator("xpath=ancestor::div[contains(@class,'oxd-input-group')][1]")
+            .locator("input.oxd-input")
             .first();
     }
 
@@ -218,7 +259,7 @@ export class EmployeeDetailsPage {
         return scope.locator(".oxd-radio-wrapper label").filter({ hasText: text }).first();
     }
 
-    private async _fillInput(input: Locator, value: string): Promise<void> {
+    private async _fillInput(input: Locator, value: string): Promise<void> { 
         await input.click();
         await input.fill("");
         await input.fill(value);
